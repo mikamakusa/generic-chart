@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "generic-chart.fullname" . }}
+  labels:
+    {{- include "generic-chart.labels" . | nindent 4 }}
+spec:
+  {{- if .values.job.parallelism }}
+  parallelism: {{ .Values.job.parallelism }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.job.Annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        { { - include "generic-chart.labels" . | nindent 8 } }
+        { { - with .Values.podLabels } }
+        { { - toYaml . | nindent 8 } }
+        { { - end } }
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "generic-chart.serviceAccountName" .}}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "generic-chart.fullname" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.job.image.pullPolicy }}
+          command: [ "python", "-c" ]
+          args: [ "print('Hello from the Kubernetes job')" ]
+          {{- with .Values.job.livenssProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{ - with .Values.job.readinessProbe }}
+          readinessProbe:
+            {{ - toYaml . | nindent 12 }}
+          {{ - end }}
+      restartPolicy: {{ .values.job.restartPolicy }}
+  backoffLimit: 4
+  
