@@ -1,0 +1,60 @@
+{{- if .Values.cronjob.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "generic-chart.fullname" . }}
+spec:
+  schedule: {{ .Values.cronjob.schedule }}
+  jobTemplate:
+    spec:
+      parallelism: {{ .Values.cronjob.parallelism }}
+      completions: {{ .Values.cronjob.completions }}
+      backoffLimit: {{ .Values.cronjob.backOffLimit }}
+      {{- with .Values.cronjob.podFailurePolicy }}
+      podFailurePolicy:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      template:
+        spec:
+          containers:
+            - name: {{ include "generic-chart.fullname" . }}
+              image: "{{ .Values.cronjob.image.repository }}:{{ .Values.cronjob.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.cronjob.image.pullPolicy }}
+              {{- with .Values.cronjob.livenessProbe }}
+              livenessProbe:
+                {{- toYaml . | nindent 12 }}
+              {{- end }}
+              {{- with .Values.cronjob.readinessProbe }}
+              readinessProbe:
+                {{- toYaml . | nident 12 }}
+              {{- end }}
+              {{- with .Values.cronjob.env }}
+              env:
+                {{- toYaml . | nindent 12 }}
+              {{- end }}
+              {{- with .Values.cronjobs.volumeMounts }}
+              volumeMounts:
+                {{- toYaml . | nindent 12 }}
+              {{- end }}
+              command:
+                - /bin/sh
+                - -c
+                - date; echo Hello!
+          restartPolicy: {{ .values.cronjob.restartPolicy }}
+          {{- with .Values.cronjob.volumes}}
+          volumes:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{- with .Values.cronjob.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{ - with .Values.affinity }}
+          affinity:
+            {{ - toYaml . | nindent 8 }}
+          {{ - end }}
+          {{ - with .Values.tolerations }}
+          tolerations:
+            {{ - toYaml . | nindent 8 }}
+          {{ - end }}
+{{- end }}
