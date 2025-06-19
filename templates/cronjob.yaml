@@ -3,6 +3,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ include "generic-chart.fullname" . }}
+  namespace: {{ .Values.namespace }}
 spec:
   schedule: {{ .Values.cronjob.schedule }}
   jobTemplate:

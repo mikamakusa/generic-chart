@@ -2,11 +2,15 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "generic-chart.fullname" . }}
+  namespace: {{ .Values.namespace }}
   labels:
     {{- include "generic-chart.labels" . | nindent 4 }}
 spec:
   {{- if .values.job.parallelism }}
   parallelism: {{ .Values.job.parallelism }}
+  selector:
+    matchLabels:
+      {{- include "generic-chart.selectorLabels" . | nindent 6 }}
   {{- end }}
   template:
     metadata:
@@ -15,10 +19,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        { { - include "generic-chart.labels" . | nindent 8 } }
-        { { - with .Values.podLabels } }
-        { { - toYaml . | nindent 8 } }
-        { { - end } }
+        {{ - include "generic-chart.labels" . | nindent 8 }}
+        {{ - with .Values.podLabels }}
+        {{ - toYaml . | nindent 8 }}
+        {{ - end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -35,7 +39,7 @@ spec:
           imagePullPolicy: {{ .Values.job.image.pullPolicy }}
           command: [ "python", "-c" ]
           args: [ "print('Hello from the Kubernetes job')" ]
-          {{- with .Values.job.livenssProbe }}
+          {{- with .Values.job.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -43,6 +47,14 @@ spec:
           readinessProbe:
             {{ - toYaml . | nindent 12 }}
           {{ - end }}
+          {{ - with .Values.job.volumeMounts }}
+          volumeMounts:
+            {{ - toYaml . | nindent 12 }}
+          {{ - end }}
+      {{- with .Values.job.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       restartPolicy: {{ .values.job.restartPolicy }}
   backoffLimit: 4
   
