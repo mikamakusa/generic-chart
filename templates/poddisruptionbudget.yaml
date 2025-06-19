@@ -1,0 +1,15 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "generic-chart.fullname" . }}
+  labels:
+    labels:
+      {{ - include "generic-chart.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "generic-chart.selectorLabels" . | nindent 6 }}
+  maxUnavailable: {{- .Values.maxUnavailable }}
+  minAvailable: {{- .Values.minAvailable }}
+{{- end }}

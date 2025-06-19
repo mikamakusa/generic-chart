@@ -32,6 +32,9 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .values.priorityClass.enabled }}
+      priorityClassName: {{ include "generic-chat.fullname" . }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}

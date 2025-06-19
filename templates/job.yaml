@@ -2,7 +2,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "generic-chart.fullname" . }}
-  namespace: {{ .Values.namespace }}
   labels:
     {{- include "generic-chart.labels" . | nindent 4 }}
 spec:
@@ -11,6 +10,10 @@ spec:
   selector:
     matchLabels:
       {{- include "generic-chart.selectorLabels" . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.job.podFailurePolicy }}
+  podFailurePolicy:
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   template:
     metadata:
@@ -33,6 +36,7 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       containers:
         - name: {{ include "generic-chart.fullname" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
