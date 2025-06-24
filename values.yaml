@@ -121,3 +121,15 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+cronJob: {}
+
+job: {}
+
+clusterRole: {}
+
+clusterRoleBinding: {}
+
+priorityClass: {}
+
+roleBinding: {}

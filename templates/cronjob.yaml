@@ -21,11 +21,11 @@ spec:
             - name: {{ include "generic-chart.fullname" . }}
               image: "{{ .Values.cronjob.image.repository }}:{{ .Values.cronjob.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.cronjob.image.pullPolicy }}
-              {{- with .Values.cronjob.livenessProbe }}
+              {{- with .Values.livenessProbe }}
               livenessProbe:
                 {{- toYaml . | nindent 12 }}
               {{- end }}
-              {{- with .Values.cronjob.readinessProbe }}
+              {{- with .Values.readinessProbe }}
               readinessProbe:
                 {{- toYaml . | nident 12 }}
               {{- end }}
@@ -46,7 +46,7 @@ spec:
           volumes:
             {{- toYaml . | nindent 8 }}
           {{- end }}
-          {{- with .Values.cronjob.nodeSelector }}
+          {{- with .Values.nodeSelector }}
           nodeSelector:
             {{- toYaml . | nindent 8 }}
           {{- end }}

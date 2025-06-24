@@ -43,11 +43,11 @@ spec:
           imagePullPolicy: {{ .Values.job.image.pullPolicy }}
           command: [ "python", "-c" ]
           args: [ "print('Hello from the Kubernetes job')" ]
-          {{- with .Values.job.livenessProbe }}
+          {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{ - with .Values.job.readinessProbe }}
+          {{ - with .Values.readinessProbe }}
           readinessProbe:
             {{ - toYaml . | nindent 12 }}
           {{ - end }}

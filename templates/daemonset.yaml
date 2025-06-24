@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "generic-chart.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "generic-chart.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "generic-chart.fullname" . }}
+    spec:
+      {{- with .Values.daemonSet.readinessGates }}
+      readinessGates:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.daemonSet.name }}
+          image: {{ .Values.daemonSet.Image }}
+          {{- with .Values.daemonSet.args }}
+          args:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          imagePullPolicy: {{ .Values.daemonSet.imagePullPolicy }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          {{- with .Values.daemonSet.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+      terminationGracePeriodSeconds: {{- .Values.daemonSet.terminationGracePeriodSeconds }}
+      restartPolicy: {{- .Values.daemonSet.restartPolicy }}
+      {{- with .Values.daemonSet.volumes }}
+      volumes:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.daemonSet.affinity }}
+      affinity:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{ - with .Values.tolerations }}
+      tolerations:
+        {{ - toYaml . | nindent 6 }}
+      {{ - end }}
