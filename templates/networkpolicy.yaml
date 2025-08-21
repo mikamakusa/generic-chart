@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "generic-chart.fullname" . }}
+  {{- if .Values.annotations }}
+annotations:
+  {{ toYaml .Values.annotations | indent 4}}
+  {{- end }}
+labels:
+  app: {{ template "networkpolicy.name" . }}
+  chart: {{ .Chart.Name }}
+  release: {{ .Release.Name }}
+  heritage: {{ .Release.Service }}
+  {{- if .Values.labels }}
+  {{ toYaml .Values.labels | indent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.networkPolicy.podSelector }}
+podSelector:
+  matchLabels:
+  {{ toYaml .Values.networkPolicy.podSelector.matchLabels | indent 7 }}
+  {{- end }}
+  {{- if or .Values.networkPolicy.ingressRules .Values.networkPolicy.egressRules }}
+policyTypes:
+  {{- if .Values.networkPolicy.ingressRules }}
+- Ingress
+  {{- end }}
+  {{- if .Values.networkPolicy.egressRules }}
+- Egress
+  {{- end }}
+  {{- end }}
+  {{- if .Values.networkPolicy.egressRules }}
+egress:
+  {{-  range $rule := .Values.networkPolicy.egressRules }}
+- to:
+  {{ toYaml $rule.networkPolicy.selectors | indent 9 }}
+ports:
+  {{ toYaml $rule.networkPolicy.ports | indent 9 }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.networkPolicy.ingressRules }}
+ingress:
+  {{-  range $rule := .Values.networkPolicy.ingressRules }}
+- from:
+  {{ toYaml $rule.networkPolicy.selectors | indent 7 }}
+ports:
+  {{ toYaml $rule.networkPolicy.ports | indent 9 }}
+  {{- end }}
+  {{- end }}
+
